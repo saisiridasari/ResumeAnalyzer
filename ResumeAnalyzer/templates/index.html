@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Analyzer — AI-Powered Career Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+
+  <!-- Background grid -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--1" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--2" aria-hidden="true"></div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <div class="nav__brand">
+        <span class="nav__logo" aria-hidden="true">◈</span>
+        <span class="nav__title">ResumeIQ</span>
+      </div>
+      <div class="nav__badge">AI-Powered · NLP · v2.0</div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero__inner">
+      <h1 class="hero__heading">
+        Know exactly how well your<br>
+        <em>resume fits any job.</em>
+      </h1>
+      <p class="hero__sub">
+        Upload your resume and paste a job description. Our NLP engine parses, matches,
+        and scores your profile, then tells you exactly what to fix.
+      </p>
+      <div class="hero__stats">
+        <div class="stat">
+          <span class="stat__num">50%</span>
+          <span class="stat__label">Skills weight</span>
+        </div>
+        <div class="stat__divider"></div>
+        <div class="stat">
+          <span class="stat__num">NER</span>
+          <span class="stat__label">Entity extraction</span>
+        </div>
+        <div class="stat__divider"></div>
+        <div class="stat">
+          <span class="stat__num">TF-IDF</span>
+          <span class="stat__label">Keyword matching</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Form -->
+  <main class="main-container" id="analyzer">
+    <div class="card card--form">
+      <div class="card__header">
+        <h2 class="card__title">Start Your Analysis</h2>
+        <p class="card__desc">Both fields are required for a complete match report.</p>
+      </div>
+
+      <form id="analyzeForm" class="form" novalidate>
+
+        <!-- Step 1: Resume Upload -->
+        <div class="form__section">
+          <div class="form__step-label">
+            <span class="step-num">01</span>
+            <span class="step-text">Upload Your Resume</span>
+          </div>
+
+          <div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="Drop zone for resume file">
+            <input type="file" id="resumeFile" name="resume" accept=".pdf,.docx" class="upload-zone__input" aria-hidden="true">
+            <div class="upload-zone__content" id="uploadContent">
+              <div class="upload-zone__icon" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                  <path d="M20 8v16M13 15l7-7 7 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M8 28c0 2.2 1.8 4 4 4h16c2.2 0 4-1.8 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <p class="upload-zone__primary">Drop your resume here</p>
+              <p class="upload-zone__secondary">or <span class="upload-zone__link">browse files</span></p>
+              <p class="upload-zone__formats">PDF or DOCX · Max 16 MB</p>
+            </div>
+            <div class="upload-zone__preview" id="uploadPreview" style="display:none;">
+              <div class="file-preview">
+                <span class="file-preview__icon" aria-hidden="true">📄</span>
+                <div class="file-preview__info">
+                  <span class="file-preview__name" id="previewName"></span>
+                  <span class="file-preview__size" id="previewSize"></span>
+                </div>
+                <button type="button" class="file-preview__remove" id="removeFile" aria-label="Remove file">✕</button>
+              </div>
+            </div>
+          </div>
+          <p class="form__error" id="resumeError" role="alert"></p>
+        </div>
+
+        <!-- Step 2: Job Description -->
+        <div class="form__section">
+          <div class="form__step-label">
+            <span class="step-num">02</span>
+            <span class="step-text">Paste the Job Description</span>
+          </div>
+          <div class="textarea-wrapper">
+            <textarea
+              id="jobDescription"
+              name="job_description"
+              class="form__textarea"
+              placeholder="Paste the full job description here, including responsibilities, required skills, and qualifications…"
+              rows="10"
+              aria-label="Job description"
+            ></textarea>
+            <div class="textarea-counter">
+              <span id="jdCharCount">0</span> characters
+            </div>
+          </div>
+          <p class="form__error" id="jdError" role="alert"></p>
+        </div>
+
+        <!-- Submit -->
+        <div class="form__actions">
+          <button type="submit" class="btn btn--primary" id="submitBtn">
+            <span class="btn__text">Analyze My Resume</span>
+            <span class="btn__icon" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- How it works -->
+    <div class="how-it-works">
+      <h3 class="how-it-works__title">How the Analysis Works</h3>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-card__num">1</div>
+          <h4 class="step-card__title">Parse</h4>
+          <p class="step-card__desc">spaCy + NLTK extract your name, contact info, skills, education, experience, and certifications from your document.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-card__num">2</div>
+          <h4 class="step-card__title">Extract</h4>
+          <p class="step-card__desc">A curated skill database cross-references both your resume and the JD, normalizing synonyms and aliases.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-card__num">3</div>
+          <h4 class="step-card__title">Match</h4>
+          <p class="step-card__desc">TF-IDF vectorization and cosine similarity quantify keyword overlap, while rule-based logic scores education and experience.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-card__num">4</div>
+          <h4 class="step-card__title">Score</h4>
+          <p class="step-card__desc">A weighted scoring model (Skills 50%, Experience 20%, Education 15%, Certs 10%, Keywords 5%) produces your final match score.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay" style="display:none;" role="status" aria-live="polite">
+    <div class="loading-card">
+      <div class="loading-spinner" aria-hidden="true">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring spinner-ring--2"></div>
+        <div class="spinner-ring spinner-ring--3"></div>
+      </div>
+      <h3 class="loading-title" id="loadingTitle">Uploading resume…</h3>
+      <p class="loading-sub" id="loadingSub">This takes a few seconds</p>
+      <div class="loading-steps">
+        <div class="loading-step" id="lstep-1">
+          <span class="loading-step__icon">⏳</span>
+          <span>Uploading file</span>
+        </div>
+        <div class="loading-step" id="lstep-2">
+          <span class="loading-step__icon">⏳</span>
+          <span>Parsing resume</span>
+        </div>
+        <div class="loading-step" id="lstep-3">
+          <span class="loading-step__icon">⏳</span>
+          <span>Extracting skills</span>
+        </div>
+        <div class="loading-step" id="lstep-4">
+          <span class="loading-step__icon">⏳</span>
+          <span>Matching against JD</span>
+        </div>
+        <div class="loading-step" id="lstep-5">
+          <span class="loading-step__icon">⏳</span>
+          <span>Generating suggestions</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>ResumeIQ · Powered by spaCy, NLTK, scikit-learn · Open Source</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

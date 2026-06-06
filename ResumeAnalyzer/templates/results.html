@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysis Results — ResumeIQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/results.css') }}">
+</head>
+<body class="results-page">
+
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <div class="nav__brand">
+        <span class="nav__logo" aria-hidden="true">◈</span>
+        <span class="nav__title">ResumeIQ</span>
+      </div>
+      <a href="/" class="btn btn--ghost btn--sm">← New Analysis</a>
+    </div>
+  </nav>
+
+  <!-- Loading state shown until data loads -->
+  <div id="resultsLoading" class="results-loading">
+    <div class="loading-spinner" style="margin: 0 auto 1.5rem;">
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring spinner-ring--2"></div>
+    </div>
+    <p>Loading your results…</p>
+  </div>
+
+  <!-- No data state -->
+  <div id="noData" style="display:none; text-align:center; padding: 4rem 2rem;">
+    <p style="font-size:1.2rem; color: var(--text-muted);">No analysis data found.</p>
+    <a href="/" class="btn btn--primary" style="margin-top:1.5rem; display:inline-flex;">Start New Analysis</a>
+  </div>
+
+  <!-- Main results dashboard -->
+  <main class="results-main" id="resultsDashboard" style="display:none;">
+
+    <!-- Results Header -->
+    <div class="results-header">
+      <div class="results-header__inner">
+        <div class="results-header__candidate">
+          <div class="candidate-avatar" id="candidateAvatar">?</div>
+          <div>
+            <h1 class="candidate-name" id="candidateName">—</h1>
+            <div class="candidate-meta">
+              <span id="candidateEmail">—</span>
+              <span class="meta-sep">·</span>
+              <span id="candidatePhone">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="results-header__actions">
+          <button class="btn btn--ghost btn--sm" id="downloadReport">↓ Download Report</button>
+          <a href="/" class="btn btn--primary btn--sm">New Analysis</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+
+      <!-- Col 1: Score + Breakdown -->
+      <div class="dashboard-col dashboard-col--left">
+
+        <!-- Overall Score -->
+        <div class="score-card" id="scoreCard">
+          <div class="score-ring-wrapper">
+            <svg class="score-ring" viewBox="0 0 200 200" aria-hidden="true">
+              <circle class="score-ring__bg" cx="100" cy="100" r="84"/>
+              <circle class="score-ring__fill" id="scoreRingFill" cx="100" cy="100" r="84"
+                stroke-dasharray="528" stroke-dashoffset="528"/>
+            </svg>
+            <div class="score-center">
+              <span class="score-number" id="overallScore">0</span>
+              <span class="score-label">out of 100</span>
+            </div>
+          </div>
+          <div class="score-meta">
+            <div class="score-rating" id="scoreRating">—</div>
+            <div class="score-detail">ATS Score: <strong id="atsScore">—</strong></div>
+            <div class="score-detail">Top <strong id="percentile">—</strong>% of applicants</div>
+          </div>
+        </div>
+
+        <!-- Score Breakdown -->
+        <div class="card card--compact">
+          <h3 class="card__section-title">Score Breakdown</h3>
+          <div class="breakdown-list" id="breakdownList">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Candidate Details -->
+        <div class="card card--compact">
+          <h3 class="card__section-title">Extracted Profile</h3>
+          <div class="profile-list" id="profileList">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Col 2: Skills + Keywords -->
+      <div class="dashboard-col dashboard-col--center">
+
+        <!-- Skills Match -->
+        <div class="card">
+          <h3 class="card__section-title">
+            Skills Analysis
+            <span class="badge" id="skillBadge">—</span>
+          </h3>
+
+          <div class="skills-block">
+            <h4 class="skills-block__title skills-block__title--match">
+              <span class="dot dot--green"></span> Matched Skills
+            </h4>
+            <div class="skills-tags" id="matchedSkills">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="skills-block skills-block--missing">
+            <h4 class="skills-block__title skills-block__title--missing">
+              <span class="dot dot--red"></span> Missing Skills
+            </h4>
+            <div class="skills-tags" id="missingSkills">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="skills-block" id="extraSkillsBlock">
+            <h4 class="skills-block__title">
+              <span class="dot dot--blue"></span> Additional Skills (not in JD)
+            </h4>
+            <div class="skills-tags" id="extraSkills">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Keyword Match -->
+        <div class="card">
+          <h3 class="card__section-title">Keyword Match</h3>
+          <div class="two-col-keywords">
+            <div>
+              <h4 class="skills-block__title skills-block__title--match">
+                <span class="dot dot--green"></span> Matched Keywords
+              </h4>
+              <div class="keyword-tags" id="matchedKeywords"></div>
+            </div>
+            <div>
+              <h4 class="skills-block__title skills-block__title--missing">
+                <span class="dot dot--red"></span> Missing Keywords
+              </h4>
+              <div class="keyword-tags" id="missingKeywords"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Experience & Education -->
+        <div class="two-col-cards">
+          <div class="card card--compact">
+            <h3 class="card__section-title">Experience</h3>
+            <div id="experienceBlock"><!-- JS --></div>
+          </div>
+          <div class="card card--compact">
+            <h3 class="card__section-title">Education</h3>
+            <div id="educationBlock"><!-- JS --></div>
+          </div>
+        </div>
+
+        <!-- Certifications -->
+        <div class="card card--compact">
+          <h3 class="card__section-title">Certifications</h3>
+          <div id="certBlock"><!-- JS --></div>
+        </div>
+
+      </div>
+
+      <!-- Col 3: Suggestions -->
+      <div class="dashboard-col dashboard-col--right">
+
+        <!-- Strengths -->
+        <div class="card card--strengths">
+          <h3 class="card__section-title">
+            <span class="icon-label">✦ Your Strengths</span>
+          </h3>
+          <ul class="strength-list" id="strengthList"><!-- JS --></ul>
+        </div>
+
+        <!-- Action Plan -->
+        <div class="card card--action">
+          <h3 class="card__section-title">
+            <span class="icon-label">⚡ Action Plan</span>
+          </h3>
+          <ol class="action-list" id="actionList"><!-- JS --></ol>
+        </div>
+
+        <!-- Improvement Suggestions Tabs -->
+        <div class="card">
+          <h3 class="card__section-title">Improvement Suggestions</h3>
+          <div class="suggestion-tabs" role="tablist">
+            <button class="stab stab--active" data-tab="skills" role="tab" aria-selected="true">Skills</button>
+            <button class="stab" data-tab="keywords" role="tab" aria-selected="false">Keywords</button>
+            <button class="stab" data-tab="certs" role="tab" aria-selected="false">Certs</button>
+            <button class="stab" data-tab="ats" role="tab" aria-selected="false">ATS</button>
+            <button class="stab" data-tab="projects" role="tab" aria-selected="false">Projects</button>
+          </div>
+
+          <div class="stab-content" id="tab-skills" role="tabpanel"><!-- JS --></div>
+          <div class="stab-content stab-content--hidden" id="tab-keywords" role="tabpanel"><!-- JS --></div>
+          <div class="stab-content stab-content--hidden" id="tab-certs" role="tabpanel"><!-- JS --></div>
+          <div class="stab-content stab-content--hidden" id="tab-ats" role="tabpanel"><!-- JS --></div>
+          <div class="stab-content stab-content--hidden" id="tab-projects" role="tabpanel"><!-- JS --></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>ResumeIQ · Powered by spaCy, NLTK, scikit-learn · Open Source</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/results.js') }}"></script>
+</body>
+</html>
