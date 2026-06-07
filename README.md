@@ -101,3 +101,5 @@ gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
 - Skills are detected against a curated dictionary, so terms outside that vocabulary will not be matched.
 - The ATS score and percentile are heuristic estimates, not the output of a real ATS engine.
 - Uploaded files are not removed automatically, and results are stored per browser tab, so there is no history or user account system.
+
+**Live demo:** https://resumeanalyzer-d2ke.onrender.com
