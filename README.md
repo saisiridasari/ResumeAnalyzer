@@ -16,7 +16,7 @@ A Flask web application that analyzes a resume against a job description and ret
 - **Backend:** Python, Flask 3, Werkzeug, Flask-CORS
 - **NLP and analysis:** spaCy (`en_core_web_sm`), scikit-learn, NLTK
 - **File parsing:** pdfplumber and PyPDF2 (PDF), python-docx (DOCX)
-- **Frontend:** vanilla HTML5, CSS3, and JavaScript — no framework, no build step
+- **Frontend:** HTML, CSS, and JavaScript — no framework, no build step
 - **Production server:** gunicorn
 
 There is no database. Uploaded files are stored on disk, and analysis results are held in the browser for the duration of the session.
